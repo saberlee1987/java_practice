@@ -44,4 +44,13 @@ public class PersonService {
         }
         return foundPerson;
     }
+
+    public Boolean deletePersonById(long id) {
+        getPersonById(id);
+        personRepository.deletePersonById(id);
+        return true;
+    }
+    public List<Person> getPersons() {
+        return personRepository.getPersons();
+    }
 }

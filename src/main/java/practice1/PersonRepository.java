@@ -46,4 +46,20 @@ public class PersonRepository {
         }
         return foundPerson;
     }
+
+    public void deletePersonById(long id) {
+        int foundIndex = foundIndexPersonById(id);
+        if (foundIndex >= 0) {
+            persons.remove(foundIndex);
+        }
+    }
+
+    private int foundIndexPersonById(long id) {
+        for (int i = 0; i < persons.size(); i++) {
+            if (persons.get(i).getId() == id) {
+                return i;
+            }
+        }
+        return -1;
+    }
 }

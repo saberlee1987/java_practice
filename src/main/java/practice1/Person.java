@@ -106,14 +106,14 @@ public class Person {
 
     @Override
     public String toString() {
-        return "Person{" +
-                "id=" + id +
-                ", firstName='" + firstName + '\'' +
-                ", lastName='" + lastName + '\'' +
-                ", nationalCode='" + nationalCode + '\'' +
-                ", email='" + email + '\'' +
-                ", mobile='" + mobile + '\'' +
-                ", age=" + age +
-                '}';
+        return "Person { " +
+                "\nid=" + id +
+                "\nfirstName='" + firstName + '\'' +
+                "\nlastName='" + lastName + '\'' +
+                "\nnationalCode='" + nationalCode + '\'' +
+                "\nemail='" + email + '\'' +
+                "\nmobile='" + mobile + '\'' +
+                "\nage=" + age +
+                "\n } ";
     }
 }
