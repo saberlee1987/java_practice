@@ -106,8 +106,8 @@ public class Practice1 {
     }
 
     private static void addInformationPerson(PersonService personService, Scanner scanner) {
-        Person newPerson = getPersonInformation(scanner);
         try {
+            Person newPerson = getPersonInformation(scanner);
             personService.save(newPerson);
         }catch (Exception e){
             System.err.println(e.getMessage());
