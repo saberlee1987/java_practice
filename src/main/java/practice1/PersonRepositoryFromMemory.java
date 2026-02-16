@@ -1,13 +1,16 @@
 package practice1;
 
+import lombok.Getter;
+
 import java.util.ArrayList;
 import java.util.List;
 
-public class PersonRepository {
+public class PersonRepositoryFromMemory implements PersonRepositoryInterface {
+    @Getter
     private final List<Person> persons;
     private volatile long nextId;
 
-    public PersonRepository() {
+    public PersonRepositoryFromMemory() {
         nextId = 0;
         persons = new ArrayList<>();
     }
@@ -30,10 +33,6 @@ public class PersonRepository {
                 break;
             }
         }
-    }
-
-    public List<Person> getPersons() {
-        return persons;
     }
 
     public Person getPersonById(long id) {

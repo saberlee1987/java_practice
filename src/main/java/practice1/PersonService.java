@@ -3,9 +3,9 @@ package practice1;
 import java.util.List;
 
 public class PersonService {
-    private final PersonRepository personRepository;
+    private final PersonRepositoryInterface personRepository;
 
-    public PersonService(PersonRepository personRepository) {
+    public PersonService(PersonRepositoryInterface personRepository) {
         this.personRepository = personRepository;
     }
 

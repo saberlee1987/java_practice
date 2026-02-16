@@ -1,5 +1,8 @@
 package practice1;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+
 import java.util.List;
 import java.util.Scanner;
 
@@ -7,21 +10,24 @@ public class Practice1 {
 
     public static void main(String[] args) {
         //test();
-        PersonRepository personRepository = new PersonRepository();
+//        PersonRepositoryFromMemory personRepositoryFromMemory = new PersonRepositoryFromMemory();
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.enable(SerializationFeature.INDENT_OUTPUT);
+        PersonRepositoryFromDb personRepository = new PersonRepositoryFromDb();
         PersonService personService = new PersonService(personRepository);
-        startProgram(personService, new Scanner(System.in));
+        startProgram(personService, new Scanner(System.in),mapper);
     }
 
-    private static void startProgram(PersonService personService, Scanner scanner) {
+    private static void startProgram(PersonService personService, Scanner scanner, ObjectMapper mapper) {
         showMenu();
         String choice = scanner.next();
-        executeAction(choice, personService, scanner);
+        executeAction(choice, personService, scanner,mapper);
     }
 
-    private static void executeAction(String choice, PersonService personService, Scanner scanner) {
+    private static void executeAction(String choice, PersonService personService, Scanner scanner, ObjectMapper mapper) {
         if (null == choice || choice.isEmpty()){
             System.out.println("Invalid choice");
-            startProgram(personService, scanner);
+            startProgram(personService, scanner,mapper);
             return;
         }
         switch (choice) {
@@ -29,10 +35,10 @@ public class Practice1 {
                 addInformationPerson(personService,scanner);
                 break;
             case "2":
-                shoPersons(personService);
+                shoPersons(personService,mapper);
                 break;
             case "3":
-                showPersonById(personService,scanner);
+                showPersonById(personService,scanner,mapper);
                 break;
             case "4":
                 updatePersonById(personService,scanner);
@@ -46,9 +52,9 @@ public class Practice1 {
                 break;
             default:
                 System.out.println("Invalid choice");
-                startProgram(personService, scanner);
+                startProgram(personService, scanner,mapper);
         }
-        startProgram(personService, scanner);
+        startProgram(personService, scanner,mapper);
     }
 
     private static void deletePersonById(PersonService personService, Scanner scanner) {
@@ -81,24 +87,28 @@ public class Practice1 {
         }
     }
 
-    private static void showPersonById(PersonService personService, Scanner scanner) {
+    private static void showPersonById(PersonService personService, Scanner scanner, ObjectMapper mapper) {
         System.out.print("Enter person ID : ");
         long personId = scanner.nextLong();
         try {
             Person person = personService.getPersonById(personId);
-            System.out.println("your person information : \n" + person + "\n");
+            System.out.println("your person information : \n" + mapper.writeValueAsString(person) + "\n");
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
     }
 
-    private static void shoPersons(PersonService personService) {
+    private static void shoPersons(PersonService personService, ObjectMapper mapper) {
         List<Person> persons = personService.getPersons();
         if (persons.isEmpty()) {
             System.out.println("No persons found\n");
         } else {
             personService.getPersons().forEach(person -> {
-                System.out.println(person);
+                try {
+                    System.out.println(mapper.writeValueAsString(person));
+                }catch (Exception e){
+                    System.err.println(e.getMessage());
+                }
                 System.out.println("==========================================================");
             });
             System.out.println("\n");
@@ -144,8 +154,8 @@ public class Practice1 {
 
     private static void test() {
         System.out.println("Hello World @@@@");
-        PersonRepository personRepository = new PersonRepository();
-        PersonService personService = new PersonService(personRepository);
+        PersonRepositoryFromMemory personRepositoryFromMemory = new PersonRepositoryFromMemory();
+        PersonService personService = new PersonService(personRepositoryFromMemory);
         Person person1 = new Person("saber", "azizi", "0079028748"
                 , "saberazizi66@yahoo.com", "09365627895", 38);
 
