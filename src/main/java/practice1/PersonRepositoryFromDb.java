@@ -11,8 +11,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class PersonRepositoryFromDb implements PersonRepositoryInterface {
-
-
     static {
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
@@ -20,11 +18,14 @@ public class PersonRepositoryFromDb implements PersonRepositoryInterface {
             System.err.println(e.getMessage());
         }
     }
+    private Connection getConnection() throws SQLException {
+        return DriverManager.getConnection("jdbc:mysql://localhost:3306/test2"
+                , "saber66", "AdminSaber66");
+    }
 
     @Override
     public Person save(Person person) {
-        try (Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/test2"
-                , "saber66", "AdminSaber66");
+        try (Connection connection = getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement("""
                      insert into persons (age, email, firstName, lastName, mobile, nationalCode, createdAt, updatedAt) VALUES (?,?,?,?,?,?,?,?)
                      """, Statement.RETURN_GENERATED_KEYS);
@@ -44,30 +45,70 @@ public class PersonRepositoryFromDb implements PersonRepositoryInterface {
             }
         } catch (Exception e) {
             System.err.println(e.getMessage());
+            throw new RuntimeException(e);
         }
         return person;
     }
 
     @Override
     public void updatePerson(Person newPerson) {
-
+        try (Connection connection = getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement("""
+                update persons set firstName=?, lastName=?, mobile=?, nationalCode=?,
+                          age=? ,email=? ,updatedAt=?  where id=?
+            """);
+        ) {
+            preparedStatement.setString(1, newPerson.getFirstName());
+            preparedStatement.setString(2, newPerson.getLastName());
+            preparedStatement.setString(3, newPerson.getMobile());
+            preparedStatement.setString(4, newPerson.getNationalCode());
+            preparedStatement.setInt(5, newPerson.getAge());
+            preparedStatement.setString(6, newPerson.getEmail());
+            preparedStatement.setObject(7, newPerson.getUpdatedAt());
+            preparedStatement.setLong(8, newPerson.getId());
+            preparedStatement.executeUpdate();
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
     public Person getPersonById(long id) {
-        return null;
+        try (Connection connection = getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement("select * from persons where id = ?");
+        ) {
+            preparedStatement.setLong(1, id);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                return getPersonFromDb(resultSet);
+            } else {
+                throw new RuntimeException("No person found with id " + id);
+            }
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
     public void deletePersonById(long id) {
-
+        try (Connection connection = getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement("delete from persons where id = ?");
+        ) {
+            preparedStatement.setLong(1, id);
+            preparedStatement.executeUpdate();
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
+            throw new RuntimeException(e);
+        }
     }
+
 
     @Override
     public List<Person> getPersons() {
         List<Person> persons = new ArrayList<>();
-        try (Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/test2"
-                , "saber66", "AdminSaber66");
+        try (Connection connection = getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement("select * from persons");
         ) {
             ResultSet resultSet = preparedStatement.executeQuery();
@@ -76,6 +117,7 @@ public class PersonRepositoryFromDb implements PersonRepositoryInterface {
             }
         } catch (Exception e) {
             System.err.println(e.getMessage());
+            throw new RuntimeException(e);
         }
         return persons;
     }
@@ -88,6 +130,7 @@ public class PersonRepositoryFromDb implements PersonRepositoryInterface {
         person.setAge(resultSet.getInt("age"));
         person.setNationalCode(resultSet.getString("nationalCode"));
         person.setMobile(resultSet.getString("mobile"));
+        person.setEmail(resultSet.getString("email"));
         person.setCreatedAt(LocalDateTime.ofInstant(resultSet.getTimestamp("createdAt").toInstant(), ZoneId.of("Asia/Tehran")));
         person.setUpdatedAt(LocalDateTime.ofInstant(resultSet.getTimestamp("updatedAt").toInstant(), ZoneId.of("Asia/Tehran")));
 
